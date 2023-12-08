@@ -1,0 +1,8 @@
+{
+    "manifest_version": 3,
+    "name": "ChatGPT and Bard Speech to Text",
+    "version": "1.0.0",
+    "icons": {
+        "48": "src/assets/logo_png.png"
+    }
+}
