@@ -1,0 +1,13 @@
+.prompt-updater__icon {
+    position: absolute;
+    right: 48px;
+    bottom: 12px;
+    background-color: #00a67e;
+    padding: 4px;
+    border-radius: 8px;
+    transition: background-color 1s cubic-bezier(0.165, 0.84, 0.44, 1);
+
+    &--recording {
+        background-color: #a61300;
+    }
+}

@@ -1,7 +1,17 @@
 {
     "manifest_version": 3,
-    "name": "ChatGPT and Bard Speech to Text",
+    "name": "ChatGPT Speech to Text",
     "version": "1.0.0",
+    "content_scripts": [
+        {
+            "js": [
+                "src/content_scripts/index.tsx"
+            ],
+            "matches": [
+                "https://chat.openai.com/*"
+            ]
+        }
+    ],
     "icons": {
         "48": "src/assets/logo_png.png"
     }

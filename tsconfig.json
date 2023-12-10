@@ -8,10 +8,10 @@
     "esModuleInterop": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
-    "types": ["vite/client"],
+    "types": ["vite/client", "chrome", "dom-speech-recognition"],
     "noEmit": true,
     "isolatedModules": true,
-    "resolveJsonModule":true
+    "resolveJsonModule":true,
     // "module": "esnext",
     // "target": "ESNext",
     // "moduleResolution": "Node",
