@@ -1,0 +1,102 @@
+.settings {
+    position: absolute;
+    right: 10px;
+    bottom: 110%;
+}
+
+.settings-modal {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(#000, 0.25);
+}
+
+.settings-modal__backdrop {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background-color: rgba(0, 0, 0, 0.816);
+}
+
+.settings-modal__container {
+    position: relative;
+    max-height: 90vh;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 15px 30px 0 rgba(#000, 0.25);
+
+    @media (max-width: 600px) {
+        width: 90%;
+    }
+
+    // &,
+    // * {
+    //     scrollbar-width: 0;
+    // }
+
+    // &,
+    // *::-webkit-scrollbar {
+    //     background-color: transparent;
+    //     width: 12px;
+    // }
+
+    // &,
+    // *::-webkit-scrollbar-thumb {
+    //     border-radius: 99px;
+    //     background-color: #ddd;
+    //     border: 4px solid #fff;
+    // }
+}
+
+.settings-modal__container__header {
+    padding: 16px 24px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.settings-modal__container__header-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1;
+    font-weight: 700;
+    font-size: 1.125;
+    color: #000;
+    font-family: monospace;
+}
+
+.settings-modal__container__body {
+    padding: 24px 32px;
+    overflow-y: auto;
+    color: #000;
+    font-family: monospace;
+}
+
+.settings-modal-container__footer {
+    color: #000;
+    font-family: monospace;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    border-top: 1px solid #ddd;
+    gap: 12px;
+    position: relative;
+}

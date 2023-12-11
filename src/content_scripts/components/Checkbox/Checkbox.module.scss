@@ -1,0 +1,25 @@
+.checkbox-wrapper {
+}
+
+.checkbox__desc--title {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.checkbox__options {
+    display: grid;
+    gap: 3px;
+}
+
+.checkbox__option {
+    display: flex;
+    gap: 5px;
+    justify-content: flex-start;
+    align-items: center;
+    width: max-content;
+
+    &,
+    * {
+        cursor: pointer;
+    }
+}

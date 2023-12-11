@@ -1,0 +1,25 @@
+.radio-wrapper {
+}
+
+.radio__desc--title {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.radio__options {
+    display: grid;
+    gap: 3px;
+}
+
+.radio__option {
+    display: flex;
+    gap: 5px;
+    justify-content: flex-start;
+    align-items: center;
+    width: max-content;
+
+    &,
+    * {
+        cursor: pointer;
+    }
+}

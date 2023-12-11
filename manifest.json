@@ -14,5 +14,8 @@
     ],
     "icons": {
         "48": "src/assets/logo_png.png"
-    }
+    },
+    "permissions": [
+        "storage"
+    ]
 }
