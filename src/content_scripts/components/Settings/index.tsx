@@ -2,9 +2,10 @@ import styles from "./Settings.module.scss";
 import logo from "../../../assets/logo.svg";
 import Radio from "../Radio";
 import Checkbox from "../Checkbox";
+import useMutationObserver from "../../libs/hooks/useMutationObserver";
 import { Component, JSX, createSignal } from "solid-js";
 import { Portal } from "solid-js/web";
-import { onEnter } from "../../libs";
+import { getInputPromptElements, onEnter } from "../../libs";
 import { useSettings } from "../SettingsProvider";
 import { RecordStopType } from "../../libs/types";
 
@@ -14,15 +15,25 @@ interface ModalProps {
 }
 
 const SettingsIcon: Component<{ onClick: VoidFunction }> = (props) => {
-  const promptBox = document.getElementById(
-    "prompt-textarea"
-  ) as HTMLInputElement;
-  const promptBoxWrapper = promptBox?.parentElement?.parentElement;
+  const [elements, setElements] = createSignal(getInputPromptElements());
+
+  useMutationObserver({
+    targetNode: document.querySelector("main")!,
+    config: {
+      attributes: false,
+      characterData: false,
+      childList: true,
+      subtree: false,
+    },
+    callback() {
+      setElements(getInputPromptElements());
+    },
+  });
 
   return (
     <div>
-      {promptBoxWrapper && (
-        <Portal mount={promptBoxWrapper}>
+      {elements().promptBoxWrapper && (
+        <Portal mount={elements().promptBoxWrapper!}>
           <svg
             role="button"
             xmlns="http://www.w3.org/2000/svg"

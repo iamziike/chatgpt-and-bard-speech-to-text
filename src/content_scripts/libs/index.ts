@@ -15,3 +15,15 @@ export const newLine = (value: string) => {
 export const removeFullStop = (word: string) => {
   return word.replace(".", "");
 };
+
+export const getInputPromptElements = () => {
+  const promptBox = document.getElementById(
+    "prompt-textarea"
+  ) as HTMLInputElement;
+  const promptBoxWrapper = promptBox?.parentElement?.parentElement;
+
+  return {
+    promptBox,
+    promptBoxWrapper,
+  };
+};

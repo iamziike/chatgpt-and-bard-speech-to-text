@@ -1,28 +1,26 @@
 import styles from "./PromptUpdater.module.scss";
+import useMutationObserver from "../../libs/hooks/useMutationObserver";
 import useSpeechRecognition from "../../libs/hooks/useSpeechRecognition";
+import { createSignal, onMount } from "solid-js";
 import { Portal } from "solid-js/web";
 import { useSettings } from "../SettingsProvider";
-import { newLine, onEnter, removeFullStop } from "../../libs";
-import { createSignal, onMount } from "solid-js";
+import {
+  getInputPromptElements,
+  newLine,
+  onEnter,
+  removeFullStop,
+} from "../../libs";
 
 const PromptUpdater = () => {
-  const promptBox = document.getElementById(
-    "prompt-textarea"
-  ) as HTMLTextAreaElement;
-  const promptBoxWrapper = promptBox?.parentElement;
+  const [elements, setElements] = createSignal(getInputPromptElements());
 
   const { settings } = useSettings();
   const [promptBoxFinalWords, setPromptBoxFinalWords] = createSignal("");
   const { beginRecord, isRecording, stopRecord } = useSpeechRecognition();
 
-  onMount(() => {
-    setPromptBoxFinalWords(promptBox.value);
-    promptBox.addEventListener("keyup", ({ target }) => {
-      setPromptBoxFinalWords((target as HTMLTextAreaElement).value ?? "");
-    });
-  });
-
   const handleBeginRecord = () => {
+    const { promptBox, promptBoxWrapper } = elements();
+
     if (isRecording()) {
       stopRecord();
       return;
@@ -84,10 +82,31 @@ const PromptUpdater = () => {
     });
   };
 
+  useMutationObserver({
+    targetNode: document.querySelector("main")!,
+    config: {
+      attributes: false,
+      characterData: false,
+      childList: true,
+      subtree: false,
+    },
+    callback() {
+      setElements(getInputPromptElements());
+    },
+  });
+
+  onMount(() => {
+    const { promptBox } = elements();
+    setPromptBoxFinalWords(promptBox.value);
+    promptBox.addEventListener("keyup", ({ target }) => {
+      setPromptBoxFinalWords((target as HTMLTextAreaElement).value ?? "");
+    });
+  });
+
   return (
     <div>
-      {promptBoxWrapper && (
-        <Portal mount={promptBoxWrapper}>
+      {elements().promptBoxWrapper && (
+        <Portal mount={elements().promptBoxWrapper!}>
           <svg
             role="button"
             xmlns="http://www.w3.org/2000/svg"
