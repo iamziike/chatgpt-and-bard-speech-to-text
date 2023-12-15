@@ -11,8 +11,8 @@ const useMutationObserver = (props: Props) => {
     callback,
     targetNode,
     config = {
-      attributes: true,
-      characterData: true,
+      attributes: false,
+      characterData: false,
       childList: true,
       subtree: true,
     },
@@ -20,7 +20,6 @@ const useMutationObserver = (props: Props) => {
 
   onMount(() => {
     if (!targetNode) return;
-
     const observer = new MutationObserver(callback);
     observer.observe(targetNode, config);
   });

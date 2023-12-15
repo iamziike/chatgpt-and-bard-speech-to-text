@@ -27,13 +27,17 @@ const useSpeechRecognition = () => {
     return recognition;
   };
 
+  const cleanUp = () => {
+    setIsRecording(false);
+    setCachedRecognitionInstance(null);
+  };
+
   const stopRecord = () => {
     const recognition = cachedRecognitionInstance();
 
     if (recognition) {
-      setIsRecording(false);
+      cleanUp();
       recognition.stop();
-      setCachedRecognitionInstance(null);
     }
   };
 
@@ -74,15 +78,16 @@ const useSpeechRecognition = () => {
         recognition.onend = () => {
           handleEndRecord(stopControl.type);
         };
-
         stopRecord();
         // }, 2000);
+        return;
       }
 
       handleNewRecoginition(transcript, isFinal);
     };
 
     recognition.onend = () => {
+      cleanUp();
       handleEndRecord();
     };
   };

@@ -19,7 +19,7 @@ const PromptUpdater = () => {
   const { beginRecord, isRecording, stopRecord } = useSpeechRecognition();
 
   const handleBeginRecord = () => {
-    const { promptBox, promptBoxWrapper } = elements();
+    const { promptBox } = elements();
 
     if (isRecording()) {
       stopRecord();
