@@ -2,10 +2,11 @@ import styles from "./Settings.module.scss";
 import logo from "../../../assets/logo.svg";
 import Radio from "../Radio";
 import Checkbox from "../Checkbox";
-import { Component, createSignal } from "solid-js";
+import { Component, JSX, createSignal } from "solid-js";
 import { Portal } from "solid-js/web";
-import { useSettings } from "../SettingsProvider";
 import { onEnter } from "../../libs";
+import { useSettings } from "../SettingsProvider";
+import { RecordStopType } from "../../libs/types";
 
 interface ModalProps {
   isOpen: boolean;
@@ -29,7 +30,7 @@ const SettingsIcon: Component<{ onClick: VoidFunction }> = (props) => {
             width="30"
             viewBox="0 -960 960 960"
             class={`${styles.settings} hi-there`}
-            tabIndex={0}
+            // tabIndex={0}
             fill="#00a67e"
             onClick={props.onClick}
             onKeyDown={(event) => {
@@ -46,6 +47,45 @@ const SettingsIcon: Component<{ onClick: VoidFunction }> = (props) => {
 
 const SettingsModal: Component<ModalProps> = (props) => {
   const { settings, setSettings } = useSettings();
+
+  const whenToStopOptions: Array<{
+    title: string | JSX.Element;
+    value: RecordStopType;
+  }> = [
+    {
+      title: "Stop recording after I finish speaking",
+      value: "onSpeechEnd",
+    },
+    {
+      value: "onSayWord",
+      title: (
+        <>
+          Stop recording when I say{" "}
+          <span>
+            <input
+              type="text"
+              placeholder="Word"
+              class={styles["settings-modal-container__text-input"]}
+              value={settings.controlWords.stopRecording.value ?? ""}
+              style={{
+                width:
+                  (settings.controlWords.stopRecording.value.length || 4) +
+                  "ch",
+              }}
+              onInput={({ target }) => {
+                setSettings(
+                  "controlWords",
+                  "stopRecording",
+                  "value",
+                  target.value
+                );
+              }}
+            />
+          </span>
+        </>
+      ),
+    },
+  ];
 
   return (
     <div>
@@ -79,58 +119,76 @@ const SettingsModal: Component<ModalProps> = (props) => {
             <main class={styles["settings-modal__container__body"]}>
               <div>
                 <Radio
-                  desc={{ header: "When To Send Message" }}
-                  name="whenToSend"
+                  desc={{ header: "When To Stop Recording" }}
+                  options={whenToStopOptions}
+                  value={settings?.recordStopType}
                   onChange={({ target }) => {
-                    if (target.value) {
-                      setSettings(
-                        (prev) =>
-                          prev && { ...prev, whenToSend: target.value as any }
-                      );
-                    }
+                    const type = target.value as RecordStopType;
+                    setSettings("recordStopType", type);
                   }}
-                  options={[
-                    {
-                      title:
-                        "Send message automatically after I finish speaking",
-                      value: "OnSpeechEnd",
-                      checked: settings()?.whenToSend === "OnSpeechEnd",
-                    },
-                    {
+                />
+
+                <div class="mt-3">
+                  <div class={styles["settings-modal-container__label"]}>
+                    Controls
+                  </div>
+
+                  <Checkbox
+                    checked={Boolean(settings?.sendOnRecordStop)}
+                    onChange={({ target }) => {
+                      setSettings("sendOnRecordStop", target.checked);
+                    }}
+                    option={{
+                      title: "Send Message when Record ends",
+                    }}
+                  />
+
+                  <Checkbox
+                    checked={Boolean(
+                      settings?.controlWords?.clearPrompt?.enabled
+                    )}
+                    onChange={({ target }) => {
+                      setSettings(
+                        "controlWords",
+                        "clearPrompt",
+                        "enabled",
+                        target.checked
+                      );
+                    }}
+                    option={{
                       title: (
                         <>
-                          Send message when I say <b>Send</b>
+                          Clear Prompt when I say{" "}
+                          <span>
+                            <input
+                              type="text"
+                              placeholder="Word"
+                              class={
+                                styles["settings-modal-container__text-input"]
+                              }
+                              value={
+                                settings.controlWords.clearPrompt.value ?? ""
+                              }
+                              style={{
+                                width:
+                                  (settings.controlWords.clearPrompt.value
+                                    .length || 4) + "ch",
+                              }}
+                              onInput={({ target }) => {
+                                setSettings(
+                                  "controlWords",
+                                  "clearPrompt",
+                                  "value",
+                                  target.value
+                                );
+                              }}
+                            />
+                          </span>
                         </>
                       ),
-                      value: "onSaySend",
-                      checked: settings()?.whenToSend === "onSaySend",
-                    },
-                    {
-                      title: "Don't send message automatically",
-                      value: "Nothing",
-                      checked: settings()?.whenToSend === "Nothing",
-                    },
-                  ]}
-                />
-                <Checkbox
-                  wrapperClassName="mt-3" //provided by chatgpt existing css class
-                  desc={{ header: "When  To Clear Prompt" }}
-                  name="isClearAllowed"
-                  checked={settings()?.isClearAllowed}
-                  onChange={({ target }) => {
-                    setSettings(
-                      (prev) =>
-                        prev && { ...prev, isClearAllowed: target.checked }
-                    );
-                  }}
-                  option={{
-                    title: (
-                      <>
-                        Clear Message when <b>Clear</b> is said
-                      </>
-                    ),
-                  }}
-                />
+                    }}
+                  />
+                </div>
               </div>
             </main>
             <footer class={styles["settings-modal-container__footer"]}>

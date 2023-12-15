@@ -6,7 +6,6 @@ interface Props extends JSX.InputHTMLAttributes<HTMLInputElement> {
   options: Array<{
     title: string | JSX.Element;
     value: string;
-    checked: boolean;
   }>;
   desc: {
     header: string;
@@ -16,8 +15,6 @@ interface Props extends JSX.InputHTMLAttributes<HTMLInputElement> {
 const Radio: Component<Props> = (props) => {
   const { desc, options, ...defaultProps } = props;
 
-  console.log(defaultProps);
-
   return (
     <div class={styles.radio}>
       <div class={styles["radio__desc--title"]}>{desc.header}</div>
@@ -26,11 +23,11 @@ const Radio: Component<Props> = (props) => {
           {(option) => (
             <label class={styles.radio__option}>
               <input
-                // {...defaultProps}
+                {...defaultProps}
                 type="radio"
                 name={defaultProps.name}
                 value={option.value}
-                checked={option.checked}
+                checked={option.value === props.value}
               />
               <span>{option.title}</span>
             </label>

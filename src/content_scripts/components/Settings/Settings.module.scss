@@ -100,3 +100,21 @@
     gap: 12px;
     position: relative;
 }
+
+.settings-modal-container__label {
+    font-weight: 600;
+}
+
+.settings-modal-container__text-input {
+    border: none !important;
+    border-bottom: 1px solid !important;
+    width: fit-content;
+    font-size: inherit !important;
+    font-weight: bolder;
+    color: #00a67e !important;
+    padding: 0;
+
+    &:focus {
+        box-shadow: none;
+    }
+}

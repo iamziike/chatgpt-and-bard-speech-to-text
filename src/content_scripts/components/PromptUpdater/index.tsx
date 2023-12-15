@@ -1,83 +1,87 @@
 import styles from "./PromptUpdater.module.scss";
+import useSpeechRecognition from "../../libs/hooks/useSpeechRecognition";
 import { Portal } from "solid-js/web";
-import { createSignal } from "solid-js";
 import { useSettings } from "../SettingsProvider";
-import { onEnter } from "../../libs";
+import { newLine, onEnter, removeFullStop } from "../../libs";
+import { createSignal, onMount } from "solid-js";
 
 const PromptUpdater = () => {
-  const { settings } = useSettings();
-  const [isRecording, setIsRecording] = createSignal(false);
   const promptBox = document.getElementById(
     "prompt-textarea"
   ) as HTMLTextAreaElement;
   const promptBoxWrapper = promptBox?.parentElement;
 
-  const beginRecord = () => {
-    if (!isRecording()) {
-      let timeoutId = 0;
+  const { settings } = useSettings();
+  const [promptBoxFinalWords, setPromptBoxFinalWords] = createSignal("");
+  const { beginRecord, isRecording, stopRecord } = useSpeechRecognition();
 
-      setIsRecording(true);
+  onMount(() => {
+    setPromptBoxFinalWords(promptBox.value);
+    promptBox.addEventListener("keyup", ({ target }) => {
+      setPromptBoxFinalWords((target as HTMLTextAreaElement).value ?? "");
+    });
+  });
 
-      const recognition = new (window.SpeechRecognition ||
-        window.webkitSpeechRecognition)();
+  const handleBeginRecord = () => {
+    if (isRecording()) {
+      stopRecord();
+      return;
+    }
 
-      recognition.continuous = true;
-      recognition.lang = "en-US";
-      recognition.interimResults = true;
-      recognition.maxAlternatives = 1;
-      recognition.start();
+    const whenToStop = settings.recordStopType;
 
-      recognition.onresult = (event: SpeechRecognitionEvent) => {
-        clearTimeout(timeoutId);
-        promptBox.dispatchEvent(
-          new Event("input", {
-            bubbles: !0,
-            cancelable: !0,
-          })
-        );
+    // setup promptBox
+    promptBox.dispatchEvent(
+      new Event("input", {
+        bubbles: !0,
+        cancelable: !0,
+      })
+    );
 
-        const getNewResults = (event: SpeechRecognitionEvent) => {
-          let result = "";
-          for (let count = 0; count < event.results.length; count++) {
-            const transcript = event.results[count][0].transcript;
-            if (
-              settings()?.whenToSend === "onSaySend" &&
-              transcript.toLowerCase().replaceAll(".", "") === "send"
-            ) {
-              recognition.stop();
-              break;
-            }
+    beginRecord({
+      handleEndRecord(stopControl) {
+        if (stopControl) {
+          if (settings.sendOnRecordStop) {
+            const sendButton = document.querySelector(
+              '[data-testid="send-button"]'
+            ) as HTMLButtonElement;
 
-            result += transcript;
-            if (count + 1 < event.results.length) {
-              result += "\n";
-              promptBox.style.height = `${
-                parseInt(promptBox.style.height) + 24
-              }px`;
-            }
+            sendButton.disabled = false;
+            sendButton.click();
           }
-
-          return result;
-        };
-
-        if (settings()?.whenToSend === "OnSpeechEnd") {
-          timeoutId = setTimeout(recognition.stop, 2000);
+        }
+      },
+      handleNewRecoginition(word, isFinal) {
+        // isClear
+        if (
+          settings?.controlWords.clearPrompt.enabled &&
+          removeFullStop(word.toLowerCase()) ===
+            settings.controlWords.clearPrompt.value?.toLowerCase()
+        ) {
+          setPromptBoxFinalWords("");
+          promptBox.value = "";
+          promptBox.style.height = "24px";
+          return;
         }
 
-        promptBox.value = getNewResults(event);
-        promptBox.innerHTML = getNewResults(event);
-      };
-
-      recognition.onend = () => {
-        const sendButton = document.querySelector(
-          '[data-testid="send-button"]'
-        ) as HTMLButtonElement;
-
-        sendButton.disabled = false;
-        sendButton.click();
-        setIsRecording(false);
-      };
-    }
+        if (isFinal) {
+          return setPromptBoxFinalWords((prev) => {
+            const value = newLine(prev) + word;
+            promptBox.value = value;
+            promptBox.style.height = `${
+              parseInt(promptBox.style.height) + 24
+            }px`;
+            return value;
+          });
+        }
+        promptBox.value = newLine(promptBoxFinalWords()) + word;
+        promptBox.style.height = `${parseInt(promptBox.style.height) + 24}px`;
+      },
+      stopControl: {
+        type: whenToStop,
+        word: settings?.controlWords?.stopRecording?.value,
+      },
+    });
   };
 
   return (
@@ -90,9 +94,9 @@ const PromptUpdater = () => {
             viewBox="0 -960 960 960"
             height="30"
             width="30"
-            onClick={beginRecord}
+            onClick={handleBeginRecord}
             onKeyDown={(event) => {
-              onEnter(event, beginRecord);
+              onEnter(event, handleBeginRecord);
             }}
             class={`${styles["prompt-updater__icon"]} bounce`}
             tabIndex={0}

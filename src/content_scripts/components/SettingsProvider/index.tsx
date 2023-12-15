@@ -1,11 +1,11 @@
-import "./index.scss";
+import { Settings } from "../../libs/types";
+import { SetStoreFunction, createStore } from "solid-js/store";
 import {
-  Accessor,
   Component,
   JSX,
-  Setter,
   createContext,
   createEffect,
+  createMemo,
   createSignal,
   onMount,
   useContext,
@@ -15,14 +15,24 @@ interface Props {
   children: JSX.Element;
 }
 
-interface Settings {
-  whenToSend: "OnSpeechEnd" | "onSaySend" | "Nothing";
-  isClearAllowed: boolean;
-}
+const DEFAULT_SETTINGS: Settings = {
+  sendOnRecordStop: true,
+  recordStopType: "onSpeechEnd",
+  controlWords: {
+    clearPrompt: {
+      value: "Clear",
+      enabled: true,
+    },
+    stopRecording: {
+      value: "Stop",
+      enabled: true,
+    },
+  },
+};
 
 const SettingsContext = createContext<{
-  settings: Accessor<Settings | null>;
-  setSettings: Setter<Settings | null>;
+  settings: Settings;
+  setSettings: SetStoreFunction<Settings>;
 }>();
 
 export const useSettings = () => {
@@ -31,27 +41,27 @@ export const useSettings = () => {
 
 export const SettingsProvider: Component<Props> = (props) => {
   const SETTINGS_DB_KEY = "SETTINGS_DB_KEY";
-  const [settings, setSettings] = createSignal<Settings | null>(null);
+  const [isComponentMounted, setIsComponentMounted] = createSignal(false);
+  const [settings, setSettings] = createStore<Settings>(DEFAULT_SETTINGS);
 
   onMount(async () => {
-    const currentSettings = (await chrome.storage.local.get(SETTINGS_DB_KEY))[
-      SETTINGS_DB_KEY
-    ] as Settings;
+    const currentSettings = await chrome.storage.local.get(SETTINGS_DB_KEY);
 
-    const defaultSetting: Settings = {
-      whenToSend: "OnSpeechEnd",
-      isClearAllowed: false,
-    };
+    setSettings(currentSettings?.[SETTINGS_DB_KEY] ?? DEFAULT_SETTINGS);
 
-    setSettings(currentSettings ?? defaultSetting);
+    setIsComponentMounted(true);
   });
 
   createEffect(() => {
-    chrome.storage.local.set({ [SETTINGS_DB_KEY]: settings() });
+    if (isComponentMounted()) {
+      chrome.storage.local.set({ [SETTINGS_DB_KEY]: settings });
+    }
   });
 
   return (
-    <SettingsContext.Provider value={{ settings, setSettings }}>
+    <SettingsContext.Provider
+      value={createMemo(() => ({ settings, setSettings }))()}
+    >
       {props.children}
     </SettingsContext.Provider>
   );
